@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+# vim syn=ruby
+
+$: << 'lib'
+
+require "luobo"
+
+

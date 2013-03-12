@@ -7,6 +7,7 @@ Gem::Specification.new 'luobo', Luobo::VERSION do |s|
   s.authors           = ["Huang Wei"]
   s.email             = "huangw@pe-po.com"
   s.homepage          = "https://github.com/huangw/luobo-gem"
+  s.executables       << "tuzi"
   s.files             = `git ls-files`.split("\n") - %w[.gitignore]
   s.test_files        = Dir.glob("{spec,test}/**/*.rb")
   s.rdoc_options      = %w[--line-numbers --inline-source --title Luobo --main README.rdoc --encoding=UTF-8]
