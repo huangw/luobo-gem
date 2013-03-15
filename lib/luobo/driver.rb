@@ -1,0 +1,48 @@
+module Luobo
+  class Driver 
+    
+    ## implements the factory pattern
+    @@drivers = {}
+
+    def self.create type
+      c = @@drivers[type.to_sym]
+      raise "No registered driver for type #{type.to_s}" unless c
+      c.new
+    end
+  
+    def self.register_driver type
+      raise "Driver for #{type.to_s} already registed." if @@drivers[type.to_sym]
+      @@drivers[type.to_sym] = self
+    end
+
+    ## cross-drivers methods and callbacks
+    def convert token
+      pname = "do_" + token.processor_name.downcase
+      if self.respond_to?(pname)
+        self.send(pname.to_sym, token)
+      else
+        self.do__missing(token)
+      end
+    end
+
+    def indent token
+      " " * token.indent_level
+    end
+
+    def do__raw token
+      indent(token) + token.line_args_raw.gsub(/^\s*/, "") + "\n"
+    end
+
+    def do__missing token
+      src = indent(token) + token.line
+      src += token.block_args_raw + "\n" if token.block_args_raw
+    end
+
+    def bind template_id, locals = {}
+      DATA.each do |line|
+        puts line
+      end
+    end
+    
+  end
+end
