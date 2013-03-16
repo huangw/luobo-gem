@@ -1,3 +1,5 @@
+
+
 module Luobo
   class Driver 
     
@@ -37,12 +39,5 @@ module Luobo
       src = indent(token) + token.line
       src += token.block_args_raw + "\n" if token.block_args_raw
     end
-
-    def bind template_id, locals = {}
-      DATA.each do |line|
-        puts line
-      end
-    end
-    
   end
 end
