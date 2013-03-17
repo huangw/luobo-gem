@@ -1,0 +1,111 @@
+DRIVER: ast
+
+Raw line passed as it is.
+AST: Raw line passed as it is.
+
+## SPLIT: abc df
+AST: abc
+AST: df
+
+Raw line contains ->
+  fake block
+AST: Raw line contains -> ->
+AST: 2,fake block
+
+## SPEC: a spec blog ->
+  do that
+  do this
+  ## SPEC: nested spec ->
+    redo that
+    redo this
+  doing outside
+doing further outside
+AST: spec "a spec blog" do
+AST: 2,do that
+AST: 2,do this
+AST: end
+AST: 2,spec "nested spec" do
+AST: 4,redo that
+AST: 4,redo this
+AST: 2,end
+AST: 2,doing outside
+AST: doing further outside
+
+% =================
+Give me a loop for <%= loop_name %>
+SPEC: and has spec <%= loop_spec %> ->
+  specify a value as <%= value %>
+% -----
+% loop_name: looper
+% loop_spec: spec a loop
+% value: 89
+% -----
+% loop_name: looper again
+% loop_spec: spec a loop again
+% value: 899090
+AST: Give me a loop for looper
+AST: spec "and has spec spec a loop" do
+AST: 2,specify a value as 89
+AST: end
+AST: Give me a loop for looper again
+AST: spec "and has spec spec a loop again" do
+AST: 2,specify a value as 899090
+AST: end
+
+Test a loop inside a block argument
+AST: Test a loop inside a block argument
+
+SPEC: loop inside ->
+  % ========================
+  key value <%= store %>
+  % -----
+  % store: factory
+  % -----
+  % store: firm
+  % ------
+  % store: person
+
+AST: spec "loop inside" do
+AST: 2, key value factory
+AST: 2, key value firm
+AST: 2, key value person
+AST: end
+
+Pure raw test in indent
+  Indent with 1 level
+    Indent with 2 levels
+
+    Indent with 2 levels again
+Back!
+
+AST: Pure raw test in indent
+AST: 2,Indent with 1 level
+AST: 4,Indent with 2 levels
+AST: 4,Indent with 2 levels again
+AST: Back!
+
+UNKNOWN: unknown processor name treated as it is
+AST: UNKNOWN: unknown processor name treated as it is
+
+UNKBLOK: unknown with a block ->
+  This is quite strange!
+Send back.
+AST: UNKBLOK: unknown with a block -> ->
+AST: 2,This is quite strange!
+AST: Send back.
+
+HASH: key_name: value_name
+AST: key: key_name
+AST: value: value_name
+
+HASH: ->
+  blockkey: blockvalue
+  blockkey2: blockvalue2
+  blockkey3: blockvalue3
+
+AST: key: blockkey
+AST: value: blockvalue
+AST: key: blockkey2
+AST: value: blockvalue2
+AST: key: blockkey3
+AST: value: blockvalue3

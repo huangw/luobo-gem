@@ -27,6 +27,9 @@ module Luobo
       end
     end
 
+    def exit; end
+    def setup; end
+
     def indent token
       " " * token.indent_level
     end

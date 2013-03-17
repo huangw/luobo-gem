@@ -5,4 +5,8 @@ $: << 'lib'
 
 require "luobo"
 
+# TODO: optparser and build-in drivers.
+file = ARGV[0]
+out = STDOUT
 
+Luobo::Base.new(file, out).process

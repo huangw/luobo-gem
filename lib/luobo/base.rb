@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require "erubis"
+
 module Luobo
   ## entry class for the carrot module
   class Base    
@@ -45,7 +47,7 @@ module Luobo
     end
 
     def dump contents
-      @output.print contents
+      @output.print contents if contents
     end
 
     # travel up through the token stack, close all token with
@@ -203,6 +205,7 @@ module Luobo
 
       self.dump(@driver.exit)
       @output.close
+      self
     end
   end
 end
