@@ -13,5 +13,6 @@ Gem::Specification.new 'luobo', Luobo::VERSION do |s|
   s.rdoc_options      = %w[--line-numbers --inline-source --title Luobo --main README.rdoc --encoding=UTF-8]
 
   s.add_development_dependency 'rspec', '~> 2.5'
+  s.add_dependency 'erubis'
 end
 

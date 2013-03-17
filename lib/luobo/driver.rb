@@ -32,12 +32,12 @@ module Luobo
     end
 
     def do__raw token
-      indent(token) + token.line_args_raw.gsub(/^\s*/, "") + "\n"
+      indent(token) + token.line_code.gsub(/^\s*/, "") + "\n"
     end
 
     def do__missing token
       src = indent(token) + token.line
-      src += token.block_args_raw + "\n" if token.block_args_raw
+      src += token.block_code + "\n" if token.block_code
     end
   end
 end
