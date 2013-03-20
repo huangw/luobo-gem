@@ -3,10 +3,36 @@
 
 $: << 'lib'
 
+require "optparse"
 require "luobo"
 
-# TODO: optparser and build-in drivers.
+options = Hash.new
+
+OptionParser.new do |opt|
+  opt.banner = "Usage: tuzi [OPTIONS] filename"
+  opt.separator  ""
+  opt.separator  "Options"
+
+  opt.on("-d DRIVER","--driver DRIVER","specify a driver") do |driver|
+    options[:driver] = driver
+  end
+
+  options[:output] = STDOUT
+  opt.on("-o OUTPUT","--output OUTPUT","the output file or file handler") do |output|
+    options[:output] = output
+  end
+
+  opt.on("-h","--help","help") do
+    puts opt
+    exit
+  end
+end.parse!
+
+
+# ---------
 file = ARGV[0]
 out = STDOUT
 
-Luobo::Base.new(file, out).process
+lb = Luobo::Base.new(ARGV[0], out)
+lb.driver = options[:driver].new if options[:driver]
+lb.process
