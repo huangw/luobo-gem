@@ -35,7 +35,11 @@ module Luobo
     end
 
     def do__raw token
-      indent(token) + token.line_code.gsub(/^\s*/, "") + "\n"
+      if token.line_code.size > 0
+        indent(token) + token.line_code.gsub(/^\s*/, "") + "\n"
+      else
+        ""
+      end
     end
 
     def do__missing token
