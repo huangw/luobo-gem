@@ -74,10 +74,11 @@ module Luobo
     # this function invokes after a loop expansion.
     def process_line line, ln, loop_n = 0
       indent_level = 0
-      if /^(?<head_space_>\s+)/ =~ line
+      nline = line.gsub(/[\-#\/]/, '')
+      if /^(?<head_space_>\s+)/ =~ nline
         indent_level = head_space_.size
       end
-      
+
       # try to close stack if applicable
       self.close_stack indent_level
 
@@ -86,12 +87,13 @@ module Luobo
       line_code = line.gsub(/^\s*/,"")
       block_code = nil
       if matches = /#{regex_proc_line}/.match(line) 
+        proc_head = matches["proc_head_"]
         processor_name = matches["proc_name_"]
         line_code = matches["line_code_"]
-        block_code = '' if line_code.gsub!(/#{regex_block_start}/, '')
+        block_code = '' if line_code.gsub!(/#{regex_block_start}/, '')  
       end
       
-      @token_stack << Token.new(ln, line, indent_level, processor_name, line_code, block_code)
+      @token_stack << Token.new(ln, line, indent_level, processor_name, line_code, block_code, proc_head)
 
       # unless it opens for block code close it soon, 
       # (dedicate the dump function to close_stack())
@@ -112,8 +114,12 @@ module Luobo
 
     # regex configurations
     # match characters before a processor keyword
+    def regex_proc_head_without_space
+      "(?<proc_head_>\s*(\#{1,}|\-{2,}|\/{2,}))?"
+    end
+
     def regex_proc_head
-      "\s*(\#{2,}|\-{2,}|\/{2,})?\s*"
+      regex_proc_head_without_space + '\s*'
     end
 
     def regex_proc_name

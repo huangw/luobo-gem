@@ -12,10 +12,10 @@ Raw line contains ->
 AST: Raw line contains -> ->
 AST: 2,fake block
 
-## SPEC: a spec blog ->
+SPEC: a spec blog ->
   do that
   do this
-  ## SPEC: nested spec ->
+  SPEC: nested spec ->
     redo that
     redo this
   doing outside
