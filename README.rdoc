@@ -1,9 +1,36 @@
 = Luobo
 
-Luobo is a simple, easy to extend code generator.
+Luobo is a code-generator that can expands macros defined in a source file.
 
-When you feed <tt>tuzi</tt> (bunny) with some luobo (carrot) script, it will produce sources base on your predefined rules.
+Basically you use luobo by extends a Converter:
 
-= Examples
+    require "luobo"
+    class LuaSpecConverter < Luobo::Converter
+      def regex_comment_header; '^\s*--' end
 
-= Build-in Drivers
+      def do_hello token
+        "-- Hello, " + token.line_code + "!"
+      end
+    end
+
+You write a lua file (`test.lua`) like:
+
+    require "some_code"
+
+    -- HELLO: world
+
+You run:
+
+    LuaSpecConverter.new('test.lua', STDOUT).convert
+
+Then you will get those in stdout:
+
+    require "some_code"
+
+    -- Hello, world!
+
+TODO:
+
+- block inside comments
+- more robust tests
+- remove bin file
