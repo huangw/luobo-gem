@@ -27,6 +27,10 @@ module Luobo
       end
     end
 
+    def dump output, contents
+      output.print contents if contents
+    end
+
     def exit; end
     def setup; end
 

@@ -9,8 +9,13 @@ module Luobo
     def initialize file, output
       @source_file = file
       
-      @output = output.is_a?(IO) ? output : File.open(output, "w")
-      
+      if output.is_a?(IO)
+        @output = output
+      elsif output.is_a?(String)
+        @output_file = output
+        @output = File.open(output, "w")
+      end
+
       # initialize:
       @token_stack = Array.new
 
@@ -47,7 +52,7 @@ module Luobo
     end
 
     def dump contents
-      @output.print contents if contents
+      @driver.dump(@output, contents) 
     end
 
     # travel up through the token stack, close all token with
@@ -157,7 +162,7 @@ module Luobo
         # ensure first line as driver definition
         unless @driver
           if matches = /^#{regex_proc_head}DRIVER#{regex_proc_end}(?<dname_>\w+)\s*$/.match(line)
-            @driver = Driver.create(matches["dname_"])
+            @driver = Driver.create(matches["dname_"]) 
             self.dump(@driver.setup)
             next
           else
@@ -204,7 +209,7 @@ module Luobo
       self.close_stack 0
 
       self.dump(@driver.exit)
-      @output.close
+      @output.close if @output_file
       self
     end
   end
