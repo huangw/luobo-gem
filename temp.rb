@@ -130,33 +130,10 @@
     end
   end
 
-  # processor converters and dump callbacks
-  # -------------------------------
-  def do_setup; "" end     # call before all tokens
-  def do_cleanup; "" end   # call after all tokens
-
-  def indent token # TODO depreciate
-    " " * token.indent_level
-  end
-
-  def do__raw token
-    if token.line_code.size > 0
-      indent(token) + token.line_code.gsub(/^\s*/, "") + "\n"
-    else
-      ""
-    end
-  end
-
-  def do__missing token
-    src = indent(token) + token.line
-    src += token.block_code + "\n" if token.block_code
-  end
   # ===============================
 
   # parse the file, whenever found a token, convert
   def process
-    in_loop = false
-    in_example = false
 
     fh = File.open(@source_file, 'r:utf-8')
     self.dump(self.do_setup)
