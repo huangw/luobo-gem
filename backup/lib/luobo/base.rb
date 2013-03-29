@@ -55,50 +55,6 @@ module Luobo
       @driver.dump(@output, contents) 
     end
 
-    # travel up through the token stack, close all token with
-    # indent level larger or equal to the parameter
-    def close_stack indent_level
-      source = ''
-      while @token_stack.size > 0 and @token_stack[-1].indent_level >= indent_level
-        if @token_stack.size > 1 
-          @token_stack[-2].add_block_code @driver.convert(@token_stack[-1])
-        else # this is the last token in the stack
-          self.dump(@driver.convert(@token_stack[-1]))
-        end
-        @token_stack.pop
-      end
-    end
-
-    # add a new line to the existing token if it requires block codes
-    # or write the last token out before a new token
-    # this function invokes after a loop expansion.
-    def process_line line, ln, loop_n = 0
-      indent_level = 0
-      nline = line.gsub(/[\-#\/]/, '')
-      if /^(?<head_space_>\s+)/ =~ nline
-        indent_level = head_space_.size
-      end
-
-      # try to close stack if applicable
-      self.close_stack indent_level
-
-      # starts a named_processor or starts a raw_processor 
-      processor_name = '_raw'
-      line_code = line.gsub(/^\s*/,"")
-      block_code = nil
-      if matches = /#{regex_proc_line}/.match(line) 
-        proc_head = matches["proc_head_"]
-        processor_name = matches["proc_name_"]
-        line_code = matches["line_code_"]
-        block_code = '' if line_code.gsub!(/#{regex_block_start}/, '')  
-      end
-      
-      @token_stack << Token.new(ln, line, indent_level, processor_name, line_code, block_code, proc_head)
-
-      # unless it opens for block code close it soon, 
-      # (dedicate the dump function to close_stack())
-      self.close_stack indent_level unless block_code
-    end
 
     # add a new line to the example, separate examples to array
     def add_example_line line
@@ -134,9 +90,6 @@ module Luobo
       "^" + regex_proc_head + regex_proc_name + regex_proc_end + "(?<line_code_>.+)"
     end
 
-    def regex_block_start
-      "\s*(?<block_start_>\-\>)?\s*$"
-    end
 
     def regex_loop_line
       "^" + regex_proc_head + "\%\s*\=\=\=\=+\s*"
