@@ -69,7 +69,7 @@ class Luobo
   def regex_proc_name; "(?<processor_name_>[A-Z][_A-Z0-9]*)" end
   def regex_proc_line; "^" + regex_proc_head + regex_proc_name + regex_proc_end + "(?<line_code_>.+)" end
   def regex_proc_end; "\s*\:?\s*" end
-  def regex_block_start; "\s*(\-\>)?\s*$" end
+  def regex_block_start; "\-\>" end
 
   # create a token from line
   def tokenize ln, line
@@ -81,8 +81,8 @@ class Luobo
       processor_name = matches["processor_name_"]
       indent_level = matches["leading_spaces_"].size
       line_code = matches["line_code_"]
-      block_open = true if /#{regex_block_start}/ =~ line_code
-      line_code.gsub!(/#{regex_block_start}/, '')  
+      block_open = true if /#{regex_block_start}\s*$/ =~ line_code
+      line_code.gsub!(/\s*(#{regex_block_start})?\s*$/, '')  
     end
 
     Token.new ln, line, indent_level, processor_name, line_code, block_open 
