@@ -16,10 +16,23 @@ describe Luobo do
       Luobo.new('-', STDOUT)
     end
 
-    it "return a token with indent level 0" do
+    it "return a token without indent" do
       token = lb.tokenize(1, "PROCNAME: proc line code")
       token.is_a?(Token).should be_true
+      token.processor_name.should eq("PROCNAME")
       token.indent_level.should eq(0)
+      token.ln.should eq(1)
+      token.line.should eq("PROCNAME: proc line code")
+      token.line_code.should eq("proc line code")
+      token.has_block?.should be_false
+      token.block_code.should eq("")
+      token.block_open?.should be_false
+    end
+
+    it "return a token with indent" do
+      token = lb.tokenize(1, "  PROCNAME: proc line code")
+      token.processor_name.should eq("PROCNAME")
+      token.indent_level.should eq(2)
       token.ln.should eq(1)
       token.line.should eq("PROCNAME: proc line code")
       token.line_code.should eq("proc line code")
