@@ -1,7 +1,7 @@
 ## this class holds a block of carrot source code tokenized by the parser.
 class Token
   attr_accessor :ln, :line, # raw codes without heading line comment marker
-    :line_code, :blocks, :indent_level, :processor_name
+    :processor_name, :line_code, :blocks, :indent_level
 
   def initialize ln, line, processor_name, line_code = '', block_open = false
     @ln, @line, @processor_name, @line_code, @block_open = ln, line, processor_name, line_code, block_open

@@ -72,8 +72,15 @@ class Luobo
     end
   end
 
+  # regex settings
+  def regex_line_comment; "" end
+  def regex_proc_head; regex_line_comment + '\s*' end
+  def regex_processor_name; "(?<processor_name_>[A-Z][_A-Z0-9]*)" end
+  def regex_proc_end; "\s*\:?\s*" end
+  def regex_block_start; "\s*(?<block_start_>\-\>)?\s*$" end
+
   # create a token from line
-  def tokenize line, ln, loop_n
+  def tokenize ln, line
 
   end
 
@@ -81,9 +88,9 @@ class Luobo
   # or write the last token out before a new token
   # this function invokes after a loop expansion or if the line
   # is not in any examples and loop templates.
-  def process_line line, ln, loop_n = 0
+  def process_line ln, line
     # create a token, with processor name
-    token = self.tokenize(line, ln, loop_n)
+    token = self.tokenize(ln, line)
   
     # based on the the token indent level, close token stack if any
     
@@ -134,7 +141,7 @@ class Luobo
       elsif in_loop
         @loop_template = @loop_template ? @loop_template + "\n" + line : line
       else
-        self.process_line line, $.
+        self.process_line $., line
       end
     end
  
