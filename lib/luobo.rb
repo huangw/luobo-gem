@@ -68,7 +68,7 @@ class Luobo
   def regex_proc_head; '(?<leading_spaces_>\s*)' end
   def regex_proc_name; "(?<processor_name_>[A-Z][_A-Z0-9]*)" end
   def regex_proc_line; "^" + regex_proc_head + regex_proc_name + regex_proc_end + "(?<line_code_>.+)" end
-  def regex_proc_end; "\s*\:?\s*" end
+  def regex_proc_end; "\s*\:?\s+" end
   def regex_block_start; "\-\>" end
 
   # create a token from line
@@ -98,6 +98,7 @@ class Luobo
       else # this is the last token in the stack
         self.dump self.convert(@token_stack[-1])
       end
+
       @token_stack.pop
     end
   end

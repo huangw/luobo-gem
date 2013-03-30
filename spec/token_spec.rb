@@ -100,4 +100,24 @@ describe Luobo do
     end
   end
 
+  context "plain raw line" do
+    subject do
+      Luobo.new('-', STDOUT).tokenize(20, "What a wonderful spirit")
+    end
+
+    its :processor_name do
+      should eq("_raw")
+    end
+  end
+
+  context "ruby comment with raw line" do
+    subject do
+      Luobo.new('-', STDOUT).tokenize(20, "# What a wonderful spirit")
+    end
+
+    its :processor_name do
+      should eq("_raw")
+    end
+  end
+
 end
