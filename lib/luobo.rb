@@ -1,6 +1,7 @@
 require "yaml"
 require "erubis"
-#require "luobo/token"
+require "luobo/token"
+
 # converter class
 class Luobo
 
@@ -58,6 +59,35 @@ class Luobo
     src
   end
 
+  def dump contents
+    @output.print contents
+  end
+
+  # regex settings
+  def regex_line_comment; "" end
+  def regex_proc_head; '(?<leading_spaces_>\s*)' end
+  def regex_proc_name; "(?<processor_name_>[A-Z][_A-Z0-9]*)" end
+  def regex_proc_line; "^" + regex_proc_head + regex_proc_name + regex_proc_end + "(?<line_code_>.+)" end
+  def regex_proc_end; "\s*\:?\s*" end
+  def regex_block_start; "\s*(\-\>)?\s*$" end
+
+  # create a token from line
+  def tokenize ln, line
+    indent_level = 0
+    processor_name = '_raw'
+    line_code = ''
+    block_open = false
+    if matches = /#{regex_proc_line}/.match(line.gsub(/^#{regex_line_comment}/, '')) 
+      processor_name = matches["processor_name_"]
+      indent_level = matches["leading_spaces_"].size
+      line_code = matches["line_code_"]
+      block_open = true if /#{regex_block_start}/ =~ line_code
+      line_code.gsub!(/#{regex_block_start}/, '')  
+    end
+
+    Token.new ln, line, indent_level, processor_name, line_code, block_open 
+  end
+
   # travel up through the token stack, close all token with
   # indent level larger or equal to the parameter
   def close_stack indent_level
@@ -72,18 +102,6 @@ class Luobo
     end
   end
 
-  # regex settings
-  def regex_line_comment; "" end
-  def regex_proc_head; regex_line_comment + '\s*' end
-  def regex_processor_name; "(?<processor_name_>[A-Z][_A-Z0-9]*)" end
-  def regex_proc_end; "\s*\:?\s*" end
-  def regex_block_start; "\s*(?<block_start_>\-\>)?\s*$" end
-
-  # create a token from line
-  def tokenize ln, line
-
-  end
-
   # add a new line to the existing token if it requires block codes
   # or write the last token out before a new token
   # this function invokes after a loop expansion or if the line
@@ -93,37 +111,11 @@ class Luobo
     token = self.tokenize(ln, line)
   
     # based on the the token indent level, close token stack if any
+    self.close_stack token.indent_level
     
     # add token and then close it unless it opens a block
-    
-  end
-
-  def process_line_ line, ln, loop_n = 0
-    indent_level = 0
-    nline = line.gsub(/[\-#\/]/, '')
-    if /^(?<head_space_>\s+)/ =~ nline
-      indent_level = head_space_.size
-    end
-
-    # try to close stack if applicable
-    self.close_stack indent_level
-
-    # starts a named_processor or starts a raw_processor 
-    processor_name = '_raw'
-    line_code = line.gsub(/^\s*/,"")
-    block_code = nil
-    if matches = /#{regex_proc_line}/.match(line) 
-      proc_head = matches["proc_head_"]
-      processor_name = matches["proc_name_"]
-      line_code = matches["line_code_"]
-      block_code = '' if line_code.gsub!(/#{regex_block_start}/, '')  
-    end
-    
-    @token_stack << Token.new(ln, line, indent_level, processor_name, line_code, block_code, proc_head)
-
-    # unless it opens for block code close it soon, 
-    # (dedicate the dump function to close_stack())
-    self.close_stack indent_level unless block_code
+    @token_stack << token
+    self.close_stack indent_level unless token.block_open?
   end
 
   # process 

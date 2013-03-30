@@ -1,12 +1,10 @@
 ## this class holds a block of carrot source code tokenized by the parser.
 class Token
-  attr_accessor :ln, :line, # raw codes without heading line comment marker
+  attr_accessor :ln, :line, :indent_level, # raw line and line number
     :processor_name, :line_code, :blocks, :indent_level
 
-  def initialize ln, line, processor_name, line_code = '', block_open = false
-    @ln, @line, @processor_name, @line_code, @block_open = ln, line, processor_name, line_code, block_open
-    @indent_level = 0
-    @indent_level = space_.size if /^(?<space_>\s+)/ =~ line
+  def initialize ln, line, indent_level, processor_name, line_code = '', block_open = false
+    @ln, @line, @indent_level, @processor_name, @line_code = ln, line, indent_level, processor_name, line_code
     @blocks = Array.new if block_open
   end
 
@@ -14,6 +12,10 @@ class Token
   def add_block_code line
     raise "block not opened in line #{:ln}" unless block_open?
     @blocks << line.chomp
+  end
+
+  def has_block? 
+    (@blocks and @blocks.size > 1) ? true : false
   end
 
   def block_open?
