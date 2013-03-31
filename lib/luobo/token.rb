@@ -11,11 +11,13 @@ class Token
   # add a line to current block args, separate each line with "\n"
   def add_block_code line
     raise "block not opened in line #{:ln}" unless block_open?
-    line.chomp.split("\n").each {|ln| @blocks << ln }
+    line.chomp.split("\n").each do |ln| 
+      @blocks << ln
+    end
   end
 
   def has_block? 
-    (@blocks and @blocks.size > 1) ? true : false
+    (@blocks and @blocks.size > 0) ? true : false
   end
 
   def block_open?
@@ -23,7 +25,7 @@ class Token
   end
 
   def block_code
-    @blocks ? @blocks.join("\n") : ""
+    has_block? ? @blocks.join("\n") : ""
   end
 
   def block_args

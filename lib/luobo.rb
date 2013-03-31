@@ -46,8 +46,8 @@ class Luobo
   def do_cleanup; "" end   # call after all tokens
 
   def do__raw token
-    if token.line_code and token.line_code.size > 0
-      token.line_code#.gsub(/^\s*/, "") + "\n"
+    if token.line and token.line.size > 0
+      token.line#.gsub(/^\s*/, "") + "\n"
     else
       ""
     end
@@ -73,16 +73,20 @@ class Luobo
 
   # create a token from line
   def tokenize ln, line
+    pure_line = line.gsub(/^#{regex_line_comment}/, '') # trim line comment marker
+
     indent_level = 0
     processor_name = '_raw'
     line_code = ''
     block_open = false
-    if matches = /#{regex_proc_line}/.match(line.gsub(/^#{regex_line_comment}/, '')) 
+    if matches = /#{regex_proc_line}/.match(pure_line) 
       processor_name = matches["processor_name_"]
       indent_level = matches["leading_spaces_"].size
       line_code = matches["line_code_"]
       block_open = true if /#{regex_block_start}\s*$/ =~ line_code
       line_code.gsub!(/\s*(#{regex_block_start})?\s*$/, '')  
+    elsif matches = /^#{regex_proc_head}[^\s]/.match(pure_line) 
+      indent_level = matches["leading_spaces_"].size
     end
 
     Token.new ln, line, indent_level, processor_name, line_code, block_open 
@@ -91,14 +95,12 @@ class Luobo
   # travel up through the token stack, close all token with
   # indent level larger or equal to the parameter
   def close_stack indent_level
-    source = ''
     while @token_stack.size > 0 and @token_stack[-1].indent_level >= indent_level
       if @token_stack.size > 1 # if this is not the last token, add to parents
         @token_stack[-2].add_block_code self.convert(@token_stack[-1])
       else # this is the last token in the stack
-        self.dump self.convert(@token_stack[-1])
+        dump self.convert(@token_stack[-1])
       end
-
       @token_stack.pop
     end
   end
@@ -110,13 +112,14 @@ class Luobo
   def process_line ln, line
     # create a token, with processor name
     token = self.tokenize(ln, line)
-  
     # based on the the token indent level, close token stack if any
     self.close_stack token.indent_level
     
     # add token and then close it unless it opens a block
     @token_stack << token
-    self.close_stack indent_level unless token.block_open?
+    self.close_stack token.indent_level unless token.block_open?
+
+    self # for methods chain
   end
 
   # process 
@@ -137,8 +140,14 @@ class Luobo
         self.process_line $., line
       end
     end
- 
     fh.close
+
+    # close all remain stacks (if any)
+    self.close_stack 0
+
+    self.dump(self.do_cleanup)
+    @output.close if @output_file
+ 
     self # return self for method chains
   end
 
