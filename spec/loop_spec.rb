@@ -6,7 +6,7 @@ class LoopLuobo < Luobo
   def regex_line_comment; "\s*#+\s?" end # use # as line comments
 
   def dump contents;
-    p contents
+    # p contents
     @dumps = Array.new unless @dumps 
     @dumps << contents 
   end
