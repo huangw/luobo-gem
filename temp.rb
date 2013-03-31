@@ -1,37 +1,7 @@
 
 
   
-  # extend a loop be examples
-  def expand_loop
-    raise "no examples found for loop start on line #{@loop_start_ln}" unless @loop_examples.size > 0
-    loop_n = 0
-    @loop_examples.each do |exa|
-      loop_n += 1
-      # treat each loop example as a yaml var definition for the template
-      rslt = Erubis::Eruby.new(@loop_template).result(YAML.load(exa))
-      li = 0
-      rslt.split("\n").each do |line|
-        li += 1
-        self.process_line line, @loop_start_ln + li, loop_n
-      end
-    end
-    
-    # clear up holders
-    self.reset_loop
-  end
-
-  # add a new line to the example, separate examples to array
-  def add_example_line line
-    if /#{regex_new_example}/.match(line)
-      # start a new loop example with a placeholder nil        
-      @loop_examples << nil
-    else
-      raise "you need use '#{regex_new_example}' to start a loop example" unless @loop_examples.size > 0
-      line.gsub!(/#{regex_example_head}/, '')
-      @loop_examples[-1] = @loop_examples[-1] ? @loop_examples[-1] + "\n" + line : line
-    end
-  end
-
+  
   def dump contents
     @output.print contents if contents
   end
@@ -101,22 +71,6 @@
     "\s*(?<block_start_>\-\>)?\s*$"
   end
 
-  # example loop related:
-  def regex_loop_line
-    "^" + regex_proc_head + "\%\s*\=\=\=\=+\s*"
-  end
-
-  def regex_new_example
-    "^" + regex_proc_head + "\%\s*\-\-\-\-+\s*"
-  end
-
-  def regex_example_head
-    "^" + regex_proc_head + "\%\s*"
-  end
-
-  def regex_example_line
-    "^" + regex_proc_head + "\%\s*(?<example_>.+)\s*"
-  end
 
   # ===============================
 

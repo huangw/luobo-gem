@@ -4,7 +4,7 @@ class OpLuobo < Luobo
   attr_accessor :token_stack, :dumps
 
   def dump contents;
-    p contents
+    # p contents
     @dumps = Array.new unless @dumps 
     @dumps << contents 
   end

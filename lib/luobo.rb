@@ -31,6 +31,37 @@ class Luobo
     @loop_examples = Array.new
   end
 
+  # extend a loop be examples
+  def expand_loop
+    raise "no examples found for loop start on line #{@loop_start_ln}" unless @loop_examples.size > 0
+    loop_n = 0
+    @loop_examples.each do |exa|
+      loop_n += 1
+      # treat each loop example as a yaml var definition for the template
+      rslt = Erubis::Eruby.new(@loop_template).result(YAML.load(exa))
+      li = 0
+      rslt.split("\n").each do |line|
+        li += 1
+        self.process_line @loop_start_ln + li, line
+      end
+    end
+    
+    # clear up holders
+    self.reset_loop
+  end
+
+  # add a new line to the example, separate examples to array
+  def add_example_line line
+    if /#{regex_new_example}/.match(line)
+      # start a new loop example with a placeholder nil        
+      @loop_examples << nil
+    else
+      raise "you need use '#{regex_new_example}' to start a loop example" unless @loop_examples.size > 0
+      line.gsub!(/#{regex_example_head}/, '')
+      @loop_examples[-1] = @loop_examples[-1] ? @loop_examples[-1] + "\n" + line : line
+    end
+  end
+
   # handle convert for each token
   def convert token
     pname = "do_" + token.processor_name.downcase
@@ -65,11 +96,17 @@ class Luobo
 
   # regex settings
   def regex_line_comment; "" end
-  def regex_proc_head; '(?<leading_spaces_>\s*)' end
+  def regex_proc_head; "(#{regex_line_comment})?(?<leading_spaces_>\s*)" end
   def regex_proc_name; "(?<processor_name_>[A-Z][_A-Z0-9]*)" end
   def regex_proc_line; "^" + regex_proc_head + regex_proc_name + regex_proc_end + "(?<line_code_>.+)" end
   def regex_proc_end; "\s*\:?\s+" end
   def regex_block_start; "\-\>" end
+
+  # example loop related:
+  def regex_loop_line; "^" + regex_proc_head + "\%\s*\=\=\=\=+\s*" end
+  def regex_new_example; "^" + regex_proc_head + "\%\s*\-\-\-\-+\s*" end
+  def regex_example_head; "^" + regex_proc_head + "\%\s*" end
+  def regex_example_line; "^" + regex_proc_head + "\%\s*(?<example_>.+)\s*" end
 
   # create a token from line
   def tokenize ln, line
@@ -131,6 +168,27 @@ class Luobo
       line.chomp!
       line.gsub!("\t", "  ") # convert tab to 2 spaces
 
+      # interrupt for loops
+      if /#{regex_loop_line}/.match(line) 
+        in_loop = true
+        @loop_start_ln = $.
+        next # break further processing if detecting a loop
+      end
+
+      # expand and end current loop 
+      if in_example
+        unless /#{regex_example_head}/.match(line) # if the line not marked as an example
+          self.expand_loop
+          in_example = false
+          in_loop = false
+        end
+      end
+
+      # end a loop template and start a loop example
+      if in_loop
+        in_example = true if /#{regex_example_head}/.match(line)
+      end
+
       # dispatch the current line to different holders
       if in_example
         self.add_example_line line
@@ -139,8 +197,12 @@ class Luobo
       else
         self.process_line $., line
       end
+      
     end
     fh.close
+
+    # do not forget expand last loop if it reaches over EOF.
+    self.expand_loop if @loop_start_ln > 0
 
     # close all remain stacks (if any)
     self.close_stack 0
