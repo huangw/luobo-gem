@@ -72,6 +72,12 @@ class Luobo
     end
   end
 
+  # convert inline processor
+  def conv_inline p, a, ln, line
+    # indent_level, processor_name, line_code, block_open 
+    convert Token.new(ln, line, 0, p, a, false)
+  end
+
   # processor converters and dump callbacks
   def do_setup; "" end     # call before all tokens
   def do_cleanup; "" end   # call after all tokens
@@ -147,6 +153,13 @@ class Luobo
   # this function invokes after a loop expansion or if the line
   # is not in any examples and loop templates.
   def process_line ln, line
+    # convert inline processor
+    while /\#\#(?<p_>[A-Z][_A-Z0-9]*)(:\s*(?<a_>.+))?\#\#/ =~ line
+      rst = conv_inline(p_, a_, ln, line)
+      raise "do not use '##.*##' inside your inline processor converting result" if rst =~ /\#\#[A-Z][_A-Z0-9]*(:\s*.+)?\#\#/
+      line.sub!(/\#\#[A-Z][_A-Z0-9]*(:\s*.+)?\#\#/, rst)
+    end
+    
     # create a token, with processor name
     token = self.tokenize(ln, line)
     # based on the the token indent level, close token stack if any

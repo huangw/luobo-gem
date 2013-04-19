@@ -29,6 +29,20 @@ Then you will get those in stdout:
 
     -- Hello, world!
 
+Inline processor like:
+
+  save to file ##FILE: name## 
+
+If you define
+
+  def do_file token
+    '<tt class="filename">' + token.line_code + '</tt>'
+  end
+
+will become:
+
+  <tt class="filename">token.line_code</tt>
+
 TODO:
 
 - block inside comments
