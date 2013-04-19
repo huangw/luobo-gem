@@ -8,6 +8,10 @@ class Token
     @blocks = Array.new if block_open
   end
 
+  def indent
+    " " * indent_level
+  end
+
   # add a line to current block args, separate each line with "\n"
   def add_block_code line
     raise "block not opened in line #{:ln}" unless block_open?
