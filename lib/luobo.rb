@@ -86,7 +86,7 @@ class Luobo
     if token.line and token.line.size > 0
       token.line.chomp + "\n"
     else
-      ""
+      "\n"
     end
   end
 
