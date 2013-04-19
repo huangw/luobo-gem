@@ -84,14 +84,14 @@ class Luobo
 
   def do__raw token
     if token.line and token.line.size > 0
-      token.line#.gsub(/^\s*/, "") + "\n"
+      token.line.chomp + "\n"
     else
       ""
     end
   end
 
   def do__missing token
-    src = token.line
+    src = token.line.chomp + "\n"
     src += token.block_code + "\n" if token.block_code
     src
   end
